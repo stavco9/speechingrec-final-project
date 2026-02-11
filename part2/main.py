@@ -21,12 +21,14 @@ cnt = 0
 
 # Function to format floats as integers if they are whole numbers, otherwise as floats
 def format_as_int_if_whole(val):
+    if type(val) not in [float, int]:
+        return val
     if pd.isna(val):
         return '' # Handle NaN values as empty strings for display
     if float(val).is_integer():
         return f'{int(val)}'
     else:
-        return f'{val:.2f}' # Format non-whole numbers to one decimal place
+        return f'{val:.3f}' # Format non-whole numbers to one decimal place
 
 for _, row in df.iterrows():
     #if cnt == 10:
@@ -57,13 +59,10 @@ statistics_avg = {k: v / cnt for k, v in statistics_total.to_dict().items()}
 statistics.append({'filename': 'AVERAGE', **statistics_avg})
 
 df_statistics = pd.DataFrame(statistics)
-df_statistics = df_statistics.reset_index(drop=True)    
-df_statistics['N_gt'] = df_statistics['N_gt'].apply(format_as_int_if_whole)
-df_statistics['N_asr'] = df_statistics['N_asr'].apply(format_as_int_if_whole)
-df_statistics['M'] = df_statistics['M'].apply(format_as_int_if_whole)
-df_statistics['S'] = df_statistics['S'].apply(format_as_int_if_whole)
-df_statistics['I'] = df_statistics['I'].apply(format_as_int_if_whole)
-df_statistics['D'] = df_statistics['D'].apply(format_as_int_if_whole)
+df_statistics = df_statistics.reset_index(drop=True)
+
+for column in df_statistics:
+    df_statistics[column] = df_statistics[column].apply(format_as_int_if_whole)
 
 display(df_statistics)
 
