@@ -67,4 +67,4 @@ df_statistics['D'] = df_statistics['D'].apply(format_as_int_if_whole)
 
 display(df_statistics)
 
-df_statistics.to_csv(os.path.join('..', 'statistics.csv'), sep='\t', index=False)
+df_statistics.to_csv(os.path.join('..', 'statistics.csv'), sep=',', index=False)
