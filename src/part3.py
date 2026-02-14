@@ -8,7 +8,7 @@ def normalize_text(text):
     print(f"Before: {text}")
 
     text = text.lower()
-    text = re.sub('[!?.,:;()"’]', '', text)
+    text = re.sub('[!?.,:;()"’\']', '', text)
     text = re.sub('[-–־]', ' ', text)
     
     numbers_in_text = re.findall(r'\d+', text)
