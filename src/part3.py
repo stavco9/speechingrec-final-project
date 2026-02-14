@@ -1,6 +1,28 @@
+import re
 import pandas as pd
 from statistics_df import StatisticsDF
 from accuracy_statistics import AccuracyStatistics
+from num2words import num2words
+
+def normalize_text(text):
+    print(f"Before: {text}")
+
+    text = text.lower()
+    text = re.sub('[!?.,:;()"’]', '', text)
+    text = re.sub('[-–־]', ' ', text)
+    
+    numbers_in_text = re.findall(r'\d+', text)
+    for number in numbers_in_text:
+        text = text.replace(number, num2words(number, lang='he'))
+
+    text = re.sub('[-–־]', ' ', text)
+
+    # Remove Hebrew Nikkud
+    text = re.sub('[\u0591-\u05C7]+', '', text)
+    
+    print(f"After: {text}")
+
+    return text
 
 df_in = pd.read_csv('transcriptions.tsv', sep='\t')
 
@@ -9,8 +31,8 @@ statistics = []
 statistics_total = AccuracyStatistics()
 
 for _, row in df_in.iterrows():
-    reference_text = row['reference_text'].split()
-    transcribed_text = row['transcribed_text'].split()
+    reference_text = normalize_text(row['reference_text']).split()
+    transcribed_text = normalize_text(row['transcribed_text']).split()
 
     accuracy_statistics = AccuracyStatistics(reference_text, transcribed_text)
     statistics_total += accuracy_statistics
@@ -28,4 +50,4 @@ df_out = StatisticsDF(statistics)
 
 df_out.display()
 
-df_out.save('statistics_origin.csv')
+df_out.save('statistics_normalized.csv')
