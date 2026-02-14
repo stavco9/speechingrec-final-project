@@ -40,6 +40,7 @@ def normalize_text(text):
 df_in = pd.read_csv('transcriptions.tsv', sep='\t')
 
 statistics = []
+normalized_text = []
 
 statistics_total = AccuracyStatistics()
 
@@ -50,6 +51,7 @@ for _, row in df_in.iterrows():
     accuracy_statistics = AccuracyStatistics(reference_text, transcribed_text)
     statistics_total += accuracy_statistics
     statistics.append({'filename': row['filename'], **accuracy_statistics.to_dict()})
+    normalized_text.append({'filename': row['filename'], 'reference_text': ' '.join(reference_text), 'transcribed_text': ' '.join(transcribed_text)})
 
 for word_pair, num in statistics_total.frequent_errors(k=20):
     print('-> "%s" replaced by "%s" %d times.' %
@@ -64,3 +66,6 @@ df_out = StatisticsDF(statistics)
 df_out.display()
 
 df_out.save('statistics_normalized.csv')
+
+df_normalized = pd.DataFrame(normalized_text)
+df_normalized.to_csv('normalized_text.tsv', index=False, sep='\t')
