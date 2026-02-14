@@ -37,10 +37,10 @@ class AccuracyStatistics:
         return [(a, b) for a, b in self.aligned_pairs if a != b and a is not None and b is not None]
 
     def get_insertions(self) -> List[Tuple]:
-        return [(None, b) for a, b in self.aligned_pairs if a is None and b is not None]
+        return [("", b) for a, b in self.aligned_pairs if a is None and b is not None]
 
     def get_deletions(self) -> List[Tuple]:
-        return [(a, None) for a, b in self.aligned_pairs if a is not None and b is None]
+        return [(a, "") for a, b in self.aligned_pairs if a is not None and b is None]
 
     def get_wer(self) -> float:
         return (self.S + self.I + self.D) / self.N_gt if self.N_gt > 0 else 0
