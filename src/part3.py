@@ -46,7 +46,8 @@ def normalize_text(text: str, filename: str):
         if prefix:
             prefix = False
             continue
-        elif len(current_word) == 1 and current_word in ['כ', 'ב', 'ש', 'ל', 'מ']:
+        elif (len(current_word) == 1 and current_word in ['כ', 'ב', 'ש', 'ל', 'מ']) or \
+            (len(current_word) == 2 and current_word in ['בכ', 'כב']):
             prefix = True
             list_connected_words.append(current_word + next_word)
         else:
