@@ -6,17 +6,21 @@ from num2words import num2words
 import phunspell
 pspell = phunspell.Phunspell('he_IL')
 
-def normalize_text(text):
+def normalize_text(text: str, filename: str):
+    #if filename == 'common_voice_he_39897724':
     print(f"Before: {text}")
 
     text = text.lower()
     text = re.sub('[!?.,:;()"’\']', '', text)
     text = text.replace('%', ' אחוזים ')
     text = re.sub('[-–־]', ' ', text)
-    
+
     numbers_in_text = re.findall(r'\d+', text)
     for number in numbers_in_text:
         text = text.replace(number, num2words(number, lang='he'))
+
+    #if filename == 'common_voice_he_39897724':
+    #    print(f"After numbers: {text}")
 
     text = re.sub('[-–־]', ' ', text)
 
@@ -32,11 +36,17 @@ def normalize_text(text):
         else:
             list_correct.append(word)
     text = ' '.join(list_correct)
-    
+
+    #if filename == 'common_voice_he_39897724':
+    #    print(f"After spell checking: {text}")
+
     list_connected_words = []
     prefix = False
     for current_word, next_word in zip(text.split(), text.split()[1:]):
-        if len(current_word) == 1 and current_word in ['כ', 'ב', 'ש', 'ל', 'מ'] and not prefix:
+        if prefix:
+            prefix = False
+            continue
+        elif len(current_word) == 1 and current_word in ['כ', 'ב', 'ש', 'ל', 'מ']:
             prefix = True
             list_connected_words.append(current_word + next_word)
         else:
@@ -46,10 +56,13 @@ def normalize_text(text):
         list_connected_words.append(text.split()[-1])
     text = ' '.join(list_connected_words)
 
+    #if filename == 'common_voice_he_39897724':
+    #    print(f"After connected words: {text}")
+
     text = re.sub('[!?.,:;()"’\']', '', text)
     text = re.sub('[-–־]', ' ', text)
     text = text.replace(' התה ', ' הייתה ')
-
+    #if filename == 'common_voice_he_39897724':
     print(f"After: {text}")
 
     return text
@@ -62,8 +75,8 @@ normalized_text = []
 statistics_total = AccuracyStatistics()
 
 for _, row in df_in.iterrows():
-    reference_text = normalize_text(row['reference_text']).split()
-    transcribed_text = normalize_text(row['transcribed_text']).split()
+    reference_text = normalize_text(row['reference_text'], row['filename']).split()
+    transcribed_text = normalize_text(row['transcribed_text'], row['filename']).split()
 
     accuracy_statistics = AccuracyStatistics(reference_text, transcribed_text)
     statistics_total += accuracy_statistics
