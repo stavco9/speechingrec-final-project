@@ -1,11 +1,12 @@
-from this import d
 from align_sequences import align_sequences
 from edit_weights import NestedUniformWeights
+from collections import Counter
 from typing import List, Tuple
 
 class AccuracyStatistics:
     def __init__(self, reference_text: List[str]=[], transcribed_text: List[str]=[]):
         self.aligned_score, self.aligned_pairs = align_sequences(reference_text, transcribed_text, NestedUniformWeights())
+        self.all_differences = self.get_difference()
         self.N_gt = len(reference_text)
         self.N_asr = len(transcribed_text)
         self.M = len(self.get_matches())
@@ -17,8 +18,18 @@ class AccuracyStatistics:
         self.precision = self.get_precision()
         self.f1_score = self.get_f1_score()
 
+    def frequent_errors(self, k: int = 10) -> List[Tuple]:
+        errors = dict[Tuple[str, str], int](Counter[Tuple[str, str]](self.all_differences))
+        errors = dict[Tuple[str, str], int](sorted(errors.items(), key=lambda x: x[1], reverse=True))
+        word_pairs = [(error[0], error[1]) for error in errors.keys()]
+        word_pairs_cnt = [error for error in errors.values()]
+        return list[Tuple[str, str], int](zip(word_pairs, word_pairs_cnt))[:k]
+
+    def get_difference(self) -> List[Tuple]:
+        return [(a, b) for a, b in self.aligned_pairs if a != b]
+
     def get_matches(self) -> List[Tuple]:
-        return [(a, b) for a, b in self.aligned_pairs if a == b and a is not None and b is not None]
+        return [(a, b) for a, b in self.aligned_pairs if a == b]
 
     def get_substitutions(self) -> List[Tuple]:
         return [(a, b) for a, b in self.aligned_pairs if a != b and a is not None and b is not None]
@@ -52,6 +63,7 @@ class AccuracyStatistics:
         self.recall += other.recall
         self.precision += other.precision
         self.f1_score += other.f1_score
+        self.all_differences.extend(other.all_differences)
         return self
 
     def to_dict(self) -> dict:

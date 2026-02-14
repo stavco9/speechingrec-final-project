@@ -140,6 +140,3 @@ def align_sequences(first_seq: Iterable,
 
     # Return the global alignment score and the aligned pairs.
     return scores_mat[first_len, second_len], aligned_pairs
-
-def get_difference(lst: List[Tuple]) -> List[Tuple]:
-    return [(a, b) for a, b in lst if a != b]
