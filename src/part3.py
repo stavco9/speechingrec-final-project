@@ -48,6 +48,7 @@ def normalize_text(text):
 
     text = re.sub('[!?.,:;()"’\']', '', text)
     text = re.sub('[-–־]', ' ', text)
+    text = text.replace(' התה ', ' הייתה ')
 
     print(f"After: {text}")
 
