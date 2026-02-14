@@ -33,6 +33,19 @@ def normalize_text(text):
             list_correct.append(word)
     text = ' '.join(list_correct)
     
+    list_connected_words = []
+    prefix = False
+    for current_word, next_word in zip(text.split(), text.split()[1:]):
+        if len(current_word) == 1 and current_word in ['כ', 'ב', 'ש', 'ל', 'מ'] and not prefix:
+            prefix = True
+            list_connected_words.append(current_word + next_word)
+        else:
+            prefix = False
+            list_connected_words.append(current_word)
+    if not prefix:
+        list_connected_words.append(text.split()[-1])
+    text = ' '.join(list_connected_words)
+
     print(f"After: {text}")
 
     return text
