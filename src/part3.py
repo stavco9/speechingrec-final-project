@@ -3,6 +3,8 @@ import pandas as pd
 from statistics_df import StatisticsDF
 from accuracy_statistics import AccuracyStatistics
 from num2words import num2words
+import phunspell
+pspell = phunspell.Phunspell('he_IL')
 
 def normalize_text(text):
     print(f"Before: {text}")
@@ -20,6 +22,16 @@ def normalize_text(text):
 
     # Remove Hebrew Nikkud
     text = re.sub('[\u0591-\u05C7]+', '', text)
+
+    list_correct = []
+    for word in text.split():
+        if not pspell.lookup(word):
+            corrected_word = next(pspell.suggest(word), word)
+            print(f"-> '%s' corrected to '%s'" % (word, corrected_word))
+            list_correct.append(corrected_word)
+        else:
+            list_correct.append(word)
+    text = ' '.join(list_correct)
     
     print(f"After: {text}")
 

@@ -4,3 +4,4 @@ pandas
 faster_whisper
 idisplay
 num2words
+phunspell
