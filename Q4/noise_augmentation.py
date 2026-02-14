@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-"""
-Part 4: Background Noise Augmentation Script
-Adds background noise to CommonVoice test set audio files
-
-Configuration for digits modulo 6 = 0:
-- Signal type: Noise (רעש)
-- Strength: Strong (חזק)
-- SNR range: 0-6 dB
-"""
-
 import os
 import random
 import numpy as np
