@@ -9,6 +9,7 @@ def normalize_text(text):
 
     text = text.lower()
     text = re.sub('[!?.,:;()"’\']', '', text)
+    text = text.replace('%', ' אחוזים ')
     text = re.sub('[-–־]', ' ', text)
     
     numbers_in_text = re.findall(r'\d+', text)
