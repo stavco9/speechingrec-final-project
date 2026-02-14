@@ -26,7 +26,9 @@ class AccuracyStatistics:
         return list[Tuple[str, str], int](zip(word_pairs, word_pairs_cnt))[:k]
 
     def get_difference(self) -> List[Tuple]:
-        return [(a, b) for a, b in self.aligned_pairs if a != b]
+        differences = [(a if a is not None else "", b if b is not None else "") 
+            for a, b in self.aligned_pairs if a != b]
+        return differences
 
     def get_matches(self) -> List[Tuple]:
         return [(a, b) for a, b in self.aligned_pairs if a == b]
