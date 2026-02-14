@@ -46,6 +46,9 @@ def normalize_text(text):
         list_connected_words.append(text.split()[-1])
     text = ' '.join(list_connected_words)
 
+    text = re.sub('[!?.,:;()"’\']', '', text)
+    text = re.sub('[-–־]', ' ', text)
+
     print(f"After: {text}")
 
     return text
