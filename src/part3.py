@@ -1,10 +1,13 @@
 import re
 import pandas as pd
+import os
 from statistics_df import StatisticsDF
 from accuracy_statistics import AccuracyStatistics
 from num2words import num2words
-import phunspell
-pspell = phunspell.Phunspell('he_IL')
+from phunspell import Phunspell
+
+#phunspell_storage_path = os.path.join(os.path.dirname(__file__), '..', 'phunspell-dict')
+pspell = Phunspell('he_IL')
 
 def normalize_text(text: str, filename: str):
     #if filename == 'common_voice_he_39897724':
