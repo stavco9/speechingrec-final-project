@@ -16,7 +16,7 @@ def normalize_text(text: str, filename: str):
     text = text.lower()
     text = re.sub('[!?.,:;()"’\']', '', text)
     text = text.replace('%', ' אחוזים ')
-    text = re.sub('[-–־]', ' ', text)
+    text = re.sub('[-–־—]', ' ', text)
 
     numbers_in_text = re.findall(r'\d+', text)
     for number in numbers_in_text:
@@ -25,7 +25,7 @@ def normalize_text(text: str, filename: str):
     #if filename == 'common_voice_he_39897724':
     #    print(f"After numbers: {text}")
 
-    text = re.sub('[-–־]', ' ', text)
+    text = re.sub('[-–־—]', ' ', text)
 
     # Remove Hebrew Nikkud
     text = re.sub('[\u0591-\u05C7]+', '', text)
@@ -64,7 +64,7 @@ def normalize_text(text: str, filename: str):
     #    print(f"After connected words: {text}")
 
     text = re.sub('[!?.,:;()"’\']', '', text)
-    text = re.sub('[-–־]', ' ', text)
+    text = re.sub('[-–־—]', ' ', text)
     text = text.replace(' התה ', ' הייתה ')
     #if filename == 'common_voice_he_39897724':
     print(f"After: {text}")
