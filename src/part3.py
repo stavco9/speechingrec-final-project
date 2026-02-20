@@ -82,15 +82,21 @@ def normalize_text(text: str, filename: str):
     # Remove Hebrew Nikkud
     text = re.sub('[\u0591-\u05C7]+', '', text)
 
-    text = correct_text(text)
+    #text = correct_text(text)
 
-    text = handle_connected_words(text)
+    #text = handle_connected_words(text)
 
     text = get_base_forms(text)
 
+    text = text.replace('[BLANK]', '')
+
     text = re.sub('[!?.,:;()"״’\']', '', text)
     text = re.sub('[-–־—]', ' ', text)
-    
+
+    text = text.replace('התה', 'הייתה')
+
+    text = " ".join(text.split())
+
     print(f"After: {text}")
 
     return text
