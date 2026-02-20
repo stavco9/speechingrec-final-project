@@ -69,7 +69,8 @@ def normalize_text(text: str, filename: str):
     print(f"Before: {text}")
 
     text = text.lower()
-    text = re.sub('[!?.,:;()"״’\']', '', text)
+    #’\'
+    text = re.sub('[!?.,:;()"״]', '', text)
     text = text.replace('%', ' אחוזים ')
     text = re.sub('[-–־—]', ' ', text)
 
