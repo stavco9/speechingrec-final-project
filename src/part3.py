@@ -5,31 +5,34 @@ from statistics_df import StatisticsDF
 from accuracy_statistics import AccuracyStatistics
 from num2words import num2words
 from phunspell import Phunspell
+from transformers import AutoTokenizer, AutoModel 
+import torch
+
+# Load Dicta's morphological model
+tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-lex')
+model = AutoModel.from_pretrained('dicta-il/dictabert-lex', trust_remote_code=True)
+#tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-large-parse')
+#model = AutoModel.from_pretrained('dicta-il/dictabert-large-parse', trust_remote_code=True)
+model.eval()
 
 #phunspell_storage_path = os.path.join(os.path.dirname(__file__), '..', 'phunspell-dict')
 pspell = Phunspell('he_IL')
 
-def normalize_text(text: str, filename: str):
-    #if filename == 'common_voice_he_39897724':
-    print(f"Before: {text}")
+def get_lemmas(text):
+    # This returns a dictionary with various morphological data
+    output = model.predict([text], tokenizer)
+    
+    # Extract the 'lemma' for each token
+    lemmas = [token['lex'] for sentence in output for token in sentence['tokens']]
+    return " ".join(lemmas)
 
-    text = text.lower()
-    text = re.sub('[!?.,:;()"’\']', '', text)
-    text = text.replace('%', ' אחוזים ')
-    text = re.sub('[-–־—]', ' ', text)
+def get_base_forms(text):
+    # This returns the 'lexemes' (the standardized base form)
+    predictions = model.predict([text], tokenizer)
+    # Extract the 'lex' field for each word
+    return " ".join([token[1] for token in predictions[0]])
 
-    numbers_in_text = re.findall(r'\d+', text)
-    for number in numbers_in_text:
-        text = text.replace(number, num2words(number, lang='he'))
-
-    #if filename == 'common_voice_he_39897724':
-    #    print(f"After numbers: {text}")
-
-    text = re.sub('[-–־—]', ' ', text)
-
-    # Remove Hebrew Nikkud
-    text = re.sub('[\u0591-\u05C7]+', '', text)
-
+def correct_text(text):
     list_correct = []
     for word in text.split():
         if not pspell.lookup(word):
@@ -39,10 +42,9 @@ def normalize_text(text: str, filename: str):
         else:
             list_correct.append(word)
     text = ' '.join(list_correct)
+    return text
 
-    #if filename == 'common_voice_he_39897724':
-    #    print(f"After spell checking: {text}")
-
+def handle_connected_words(text):
     list_connected_words = []
     prefix = False
     for current_word, next_word in zip(text.split(), text.split()[1:]):
@@ -60,13 +62,35 @@ def normalize_text(text: str, filename: str):
         list_connected_words.append(text.split()[-1])
     text = ' '.join(list_connected_words)
 
-    #if filename == 'common_voice_he_39897724':
-    #    print(f"After connected words: {text}")
+    return text
 
-    text = re.sub('[!?.,:;()"’\']', '', text)
-    text = re.sub('[-–־—]', ' ', text)
-    text = text.replace(' התה ', ' הייתה ')
+def normalize_text(text: str, filename: str):
     #if filename == 'common_voice_he_39897724':
+    print(f"Before: {text}")
+
+    text = text.lower()
+    text = re.sub('[!?.,:;()"״’\']', '', text)
+    text = text.replace('%', ' אחוזים ')
+    text = re.sub('[-–־—]', ' ', text)
+
+    numbers_in_text = re.findall(r'\d+', text)
+    for number in numbers_in_text:
+        text = text.replace(number, num2words(number, lang='he'))
+
+    text = re.sub('[-–־—]', ' ', text)
+
+    # Remove Hebrew Nikkud
+    text = re.sub('[\u0591-\u05C7]+', '', text)
+
+    text = correct_text(text)
+
+    text = handle_connected_words(text)
+
+    text = get_base_forms(text)
+
+    text = re.sub('[!?.,:;()"״’\']', '', text)
+    text = re.sub('[-–־—]', ' ', text)
+    
     print(f"After: {text}")
 
     return text
