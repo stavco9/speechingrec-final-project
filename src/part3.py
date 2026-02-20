@@ -9,10 +9,8 @@ from transformers import AutoTokenizer, AutoModel
 import torch
 
 # Load Dicta's morphological model
-tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-lex')
-model = AutoModel.from_pretrained('dicta-il/dictabert-lex', trust_remote_code=True)
-#tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-large-parse')
-#model = AutoModel.from_pretrained('dicta-il/dictabert-large-parse', trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-large-char-menaked')
+model = AutoModel.from_pretrained('dicta-il/dictabert-large-char-menaked', trust_remote_code=True)
 model.eval()
 
 #phunspell_storage_path = os.path.join(os.path.dirname(__file__), '..', 'phunspell-dict')
@@ -31,6 +29,19 @@ def get_base_forms(text):
     predictions = model.predict([text], tokenizer)
     # Extract the 'lex' field for each word
     return " ".join([token[1] for token in predictions[0]])
+
+def normalize_spelling(text):
+    # The predict method returns the text with Niqqud, 
+    # but it ALSO standardizes the spelling to a consistent Male/Hasar form.
+    # By default, it removes extra Matres Lectionis.
+    result = model.predict([text], tokenizer)
+    
+    # The output has Niqqud. To compare for WER, we strip the Niqqud back off.
+    import re
+    vocalized_text = result[0]
+    normalized_text = re.sub(r"[\u0591-\u05C7]", '', vocalized_text)
+    
+    return normalized_text
 
 def correct_text(text):
     list_correct = []
@@ -86,9 +97,9 @@ def normalize_text(text: str, filename: str):
     #text = correct_text(text)
     
     text = handle_connected_words(text)
-    text = get_base_forms(text)
+    text = normalize_spelling(text)
 
-    text = text.replace('[BLANK]', '')
+    #text = text.replace('[BLANK]', '')
 
     text = re.sub('[!?.,:;()"״’\']', '', text)
     text = re.sub('[-–־—]', ' ', text)

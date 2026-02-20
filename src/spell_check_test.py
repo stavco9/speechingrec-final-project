@@ -1,19 +1,36 @@
 from transformers import AutoTokenizer, AutoModel 
 import torch
+from phunspell import Phunspell
 
 # Load Dicta's morphological model
-tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-lex')
-model = AutoModel.from_pretrained('dicta-il/dictabert-lex', trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-large-char-menaked')
+model = AutoModel.from_pretrained('dicta-il/dictabert-large-char-menaked', trust_remote_code=True)
 model.eval()
 
-text1 = "אלה מבטאים גם הישגים בתחומי הספורט והאומנות"
-text2 = "אלא מבטאים גם הישגים בתחומי הספורט והאמנות"
+pspell = Phunspell('he_IL')
 
-text3 = "פייסבוק או חברת מטא היא הבעלים של אינסטגרם ווואטסאפ"
-text4 = "פיסבוק או חברת מטא היא הבעלים של אינסטגרם ואווטסאפ"
+texts = [
+    "אלה מבטאים גם הישגים בתחומי הספורט והאומנות",
+    "אלא מבטאים גם הישגים בתחומי הספורט והאמנות",
+    "פייסבוק או חברת מטא היא הבעלים של אינסטגרם ווואטסאפ",
+    "פיסבוק או חברת מטא היא הבעלים של אינסטגרם ואווטסאפ",
+    "ראשן החל להניקנו",
+    "עשן החל להניקנו",
+    "לעיסת החמורים נשרתה מנוחה באסמה",
+    "לעסת החמורים השרתה מנוחה באסם"
+]
 
-text5 = "ראשן החל להניקנו"
-text6 = "עשן החל להניקנו"
+def correct_text(text):
+    list_correct = []
+    for word in text.split():
+        if not pspell.lookup(word):
+            corrected_word = next(pspell.suggest(word), word)
+            #print(f"-> '%s' corrected to '%s'" % (word, corrected_word))
+            list_correct.append(corrected_word)
+        else:
+            list_correct.append(word)
+    text = ' '.join(list_correct)
+    return text
 
 def get_lemmas(text):
     # This returns a dictionary with various morphological data
@@ -43,9 +60,20 @@ def get_base_forms(text):
     # Extract the 'lex' field for each word
     return " ".join([token[1] for token in predictions[0]])
 
-print(get_base_forms(text1))
-print(get_base_forms(text2))
-print(get_base_forms(text3))
-print(get_base_forms(text4))
-print(get_base_forms(text5))
-print(get_base_forms(text6))
+def normalize_spelling(text):
+    # The predict method returns the text with Niqqud, 
+    # but it ALSO standardizes the spelling to a consistent Male/Hasar form.
+    # By default, it removes extra Matres Lectionis.
+    result = model.predict([text], tokenizer)
+    
+    # The output has Niqqud. To compare for WER, we strip the Niqqud back off.
+    import re
+    vocalized_text = result[0]
+    normalized_text = re.sub(r"[\u0591-\u05C7]", '', vocalized_text)
+    
+    return normalized_text
+    
+for text in texts:
+    #text = correct_text(text)
+    text = normalize_spelling(text)
+    print(text)
