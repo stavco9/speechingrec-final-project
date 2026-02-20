@@ -21,6 +21,14 @@ class StatisticsDF:
         for column in self.df:
           self.df[column] = self.df[column].apply(self.format_as_int_if_whole)
 
+    def sort_values(self, by: list[str], ascending: bool = False):
+        self.df = self.df.sort_values(by=by, ascending=ascending)
+        return self
+
+    def concat(self, *args: 'StatisticsDF'):
+        self.df = pd.concat([self.df, *[arg.df for arg in args]])
+        return self
+
     def display(self):
         display(self.df)
 

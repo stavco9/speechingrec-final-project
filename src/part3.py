@@ -109,6 +109,7 @@ normalized_text = []
 statistics_total = AccuracyStatistics()
 
 for _, row in df_in.iterrows():
+
     reference_text = normalize_text(row['reference_text'], row['filename']).split()
     transcribed_text = normalize_text(row['transcribed_text'], row['filename']).split()
 
@@ -122,10 +123,14 @@ for word_pair, num in statistics_total.frequent_errors(k=20):
     (word_pair[0], word_pair[1], num))
 
 statistics_avg = {k: v / len(statistics) for k, v in statistics_total.to_dict().items()}
-statistics.append({'filename': 'TOTAL', **statistics_total.to_dict()})
-statistics.append({'filename': 'AVERAGE', **statistics_avg})
 
 df_out = StatisticsDF(statistics)
+
+df_out = df_out.sort_values(by=['wer'], ascending=False)
+
+df_additional = StatisticsDF([{'filename': 'TOTAL', **statistics_total.to_dict()},
+   {'filename': 'AVERAGE', **statistics_avg}])
+df_out = df_out.concat(df_additional)
 
 df_out.display()
 
