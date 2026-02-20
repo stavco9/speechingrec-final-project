@@ -83,9 +83,8 @@ def normalize_text(text: str, filename: str):
     text = re.sub('[\u0591-\u05C7]+', '', text)
 
     #text = correct_text(text)
-
-    #text = handle_connected_words(text)
-
+    
+    text = handle_connected_words(text)
     text = get_base_forms(text)
 
     text = text.replace('[BLANK]', '')
