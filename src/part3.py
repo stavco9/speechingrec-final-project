@@ -98,6 +98,7 @@ def normalize_text(text: str, filename: str):
     
     text = handle_connected_words(text)
     text = normalize_spelling(text)
+    text = correct_text(text)
 
     #text = text.replace('[BLANK]', '')
 
@@ -112,7 +113,7 @@ def normalize_text(text: str, filename: str):
 
     return text
 
-df_in = pd.read_csv('transcriptions.tsv', sep='\t')
+df_in = pd.read_csv('transcriptions_new.tsv', sep='\t')
 
 statistics = []
 normalized_text = []
@@ -145,7 +146,7 @@ df_out = df_out.concat(df_additional)
 
 df_out.display()
 
-df_out.save('statistics_normalized.csv')
+df_out.save('statistics_normalized_new.csv')
 
 df_normalized = pd.DataFrame(normalized_text)
-df_normalized.to_csv('normalized_text.tsv', index=False, sep='\t')
+df_normalized.to_csv('normalized_text_new.tsv', index=False, sep='\t')

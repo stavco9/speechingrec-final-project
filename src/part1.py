@@ -34,7 +34,11 @@ for transription in transciptions:
     if ((cnt+1) % 10 == 0):
         print(f"Clip {cnt+1} out of {len(transciptions)}")
     
-    segs, _ = model.transcribe(os.path.join(base_clips_dir, f"{transription['filename']}.mp3"), language='he')
+    segs, _ = model.transcribe(
+        os.path.join(base_clips_dir, f"{transription['filename']}.mp3"),
+        language='he',
+        temperature=0.0,
+        beam_size=10)
 
     texts = [s.text for s in segs]
 
@@ -45,4 +49,4 @@ for transription in transciptions:
 
 df_out = pd.DataFrame(transciptions)
 
-df_out.to_csv('transcriptions.tsv', sep='\t', index=False)
+df_out.to_csv('transcriptions_new.tsv', sep='\t', index=False)
