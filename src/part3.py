@@ -98,7 +98,7 @@ def normalize_text(text: str, filename: str):
     
     text = handle_connected_words(text)
     text = normalize_spelling(text)
-    text = correct_text(text)
+    #text = correct_text(text)
 
     #text = text.replace('[BLANK]', '')
 
