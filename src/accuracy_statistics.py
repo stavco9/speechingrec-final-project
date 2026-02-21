@@ -18,7 +18,9 @@ class AccuracyStatistics:
         self.precision = self.get_precision()
         self.f1_score = self.get_f1_score()
 
-    def frequent_errors(self, k: int = 10) -> List[Tuple]:
+    def frequent_errors(self, k: int = 0) -> List[Tuple]:
+        if k == 0:
+            k = len(self.all_differences)
         errors = dict[Tuple[str, str], int](Counter[Tuple[str, str]](self.all_differences))
         errors = dict[Tuple[str, str], int](sorted(errors.items(), key=lambda x: x[1], reverse=True))
         word_pairs = [(error[0], error[1]) for error in errors.keys()]

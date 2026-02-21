@@ -77,6 +77,21 @@ common_errors = {
     "נורוגי": "נורבגי",
     "יספלו": "יסבלו",
     "תהא": "תהיה",
+    "אינתיפדת": "אינתיפאדת",
+    "לקסקלי": "לקסיקלי",
+    "סודאן": "סודן",
+    "מוסטפה": "מוסטפא",
+    "צרניחובסקי": "טשנרחובסקי",
+    "הולבורג": "אלבורג",
+    "מליונים": "מיליונים",
+    "צלאח": "סלאח",
+    "אוטסאפ": "ווטסאפ",
+    "גהנום": "גיהנום",
+    "דוקטור": "דר",
+    "דגמא": "דגמה",
+    "זקינה": "זקנה",
+    "חפשיים": "חפשים",
+    "סרנבולות": "תרנגולות"
 }
 
 def handle_common_errors(text, error_dict):
@@ -264,7 +279,7 @@ for index, row in df_in.iterrows():
     statistics.append({'filename': row['filename'], **accuracy_statistics.to_dict()})
     normalized_text.append({'filename': row['filename'], 'reference_text': ' '.join(reference_text), 'transcribed_text': ' '.join(transcribed_text)})
 
-for word_pair, num in statistics_total.frequent_errors(k=200):
+for word_pair, num in statistics_total.frequent_errors():
     print('-> "%s" replaced by "%s" %d times.' %
     (word_pair[0], word_pair[1], num))
 
