@@ -29,7 +29,10 @@ for file in files:
         temperature=0.0,
         beam_size=10,
         condition_on_previous_text=False,
-        initial_prompt="השתמש בעברית ספרותית ורהוטה עם מילים ותחביר הגיוניים")
+        patience=2.0,
+        length_penalty=1.0,
+        no_speech_threshold=0.1,
+        best_of=10)
 
     texts = [s.text for s in segs]
 
