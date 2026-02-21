@@ -100,6 +100,9 @@ common_errors = [{
         "error": "בין לאמיים",
         "correction": "בינלאמיים"
     },{
+        "error": "הבין לאמיים",
+        "correction": "הבינלאמיים"
+    },{
         "error": "מרצ",
         "correction": "מרץ"
     }]
@@ -178,7 +181,7 @@ def normalize_text(text: str, cnt: int):
     print(f"{str(cnt)}) Before: {text}")
 
     text = text.lower()
-    #’\'
+ 
     text = re.sub('[!?.,:;()"״]', '', text)
     text = text.replace('%', ' אחוזים ')
     text = re.sub('[-–־—]', ' ', text)
@@ -188,21 +191,17 @@ def normalize_text(text: str, cnt: int):
 
     text = number_to_words(text)
     text = re.sub('[-–־—]', ' ', text)
-
-    #text = correct_text(text)
     
     text = handle_connected_words(text)
     text = normalize_spelling(text)
-    text = normalize_spelling_seg(text)
-    #text = correct_text(text)
-
-    #text = text.replace('[BLANK]', '')
 
     text = re.sub('[!?.,:;()"״’\']', '', text)
     text = re.sub('[-–־—]', ' ', text)
 
     for error in common_errors:
         text = text.replace(f" {error['error']} ", f" {error['correction']} ")
+
+    text = normalize_spelling_seg(text)
 
     text = " ".join(text.split())
 
@@ -227,7 +226,7 @@ for index, row in df_in.iterrows():
     statistics.append({'filename': row['filename'], **accuracy_statistics.to_dict()})
     normalized_text.append({'filename': row['filename'], 'reference_text': ' '.join(reference_text), 'transcribed_text': ' '.join(transcribed_text)})
 
-for word_pair, num in statistics_total.frequent_errors(k=20):
+for word_pair, num in statistics_total.frequent_errors(k=50):
     print('-> "%s" replaced by "%s" %d times.' %
     (word_pair[0], word_pair[1], num))
 
