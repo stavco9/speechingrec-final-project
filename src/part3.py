@@ -9,9 +9,13 @@ from transformers import AutoTokenizer, AutoModel
 import torch
 
 # Load Dicta's morphological model
-tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-large-char-menaked')
-model = AutoModel.from_pretrained('dicta-il/dictabert-large-char-menaked', trust_remote_code=True)
-model.eval()
+tokenizer_large_char_menaked = AutoTokenizer.from_pretrained('dicta-il/dictabert-large-char-menaked')
+model_large_char_menaked = AutoModel.from_pretrained('dicta-il/dictabert-large-char-menaked', trust_remote_code=True)
+model_large_char_menaked.eval()
+
+tokenizer_seg = AutoTokenizer.from_pretrained('dicta-il/dictabert-seg')
+model_seg = AutoModel.from_pretrained('dicta-il/dictabert-seg', trust_remote_code=True)
+model_seg.eval()
 
 numbers_m_to_f = {
     "אחד": "אחת",
@@ -96,29 +100,12 @@ common_errors = [{
         "error": "בין לאמיים",
         "correction": "בינלאמיים"
     },{
-        "error": "הבין לאמיים",
-        "correction": "הבינלאמיים"
-    },{
         "error": "מרצ",
         "correction": "מרץ"
     }]
 
 #phunspell_storage_path = os.path.join(os.path.dirname(__file__), '..', 'phunspell-dict')
 pspell = Phunspell('he_IL')
-
-def get_lemmas(text):
-    # This returns a dictionary with various morphological data
-    output = model.predict([text], tokenizer)
-    
-    # Extract the 'lemma' for each token
-    lemmas = [token['lex'] for sentence in output for token in sentence['tokens']]
-    return " ".join(lemmas)
-
-def get_base_forms(text):
-    # This returns the 'lexemes' (the standardized base form)
-    predictions = model.predict([text], tokenizer)
-    # Extract the 'lex' field for each word
-    return " ".join([token[1] for token in predictions[0]])
 
 def normalize_hours(text):
     for i, word in enumerate(text.split()):
@@ -142,7 +129,7 @@ def normalize_spelling(text):
     # The predict method returns the text with Niqqud, 
     # but it ALSO standardizes the spelling to a consistent Male/Hasar form.
     # By default, it removes extra Matres Lectionis.
-    result = model.predict([text], tokenizer)
+    result = model_large_char_menaked.predict([text], tokenizer_large_char_menaked)
     
     # The output has Niqqud. To compare for WER, we strip the Niqqud back off.
     import re
@@ -150,6 +137,10 @@ def normalize_spelling(text):
     normalized_text = re.sub(r"[\u0591-\u05C7]", '', vocalized_text)
     
     return normalized_text
+
+def normalize_spelling_seg(text):
+    result = model_seg.predict([text], tokenizer_seg)
+    return ' '.join([' '.join(tokens) for tokens in result[0]][1:-1])
 
 def correct_text(text):
     list_correct = []
@@ -202,6 +193,7 @@ def normalize_text(text: str, cnt: int):
     
     text = handle_connected_words(text)
     text = normalize_spelling(text)
+    text = normalize_spelling_seg(text)
     #text = correct_text(text)
 
     #text = text.replace('[BLANK]', '')
@@ -218,7 +210,7 @@ def normalize_text(text: str, cnt: int):
 
     return text
 
-df_in = pd.read_csv('transcriptions_new.tsv', sep='\t')
+df_in = pd.read_csv('transcriptions.tsv', sep='\t')
 
 statistics = []
 normalized_text = []
@@ -251,7 +243,7 @@ df_out = df_out.concat(df_additional)
 
 df_out.display()
 
-df_out.save('statistics_normalized_new.csv')
+df_out.save('statistics_normalized.csv')
 
 df_normalized = pd.DataFrame(normalized_text)
-df_normalized.to_csv('normalized_text_new.tsv', index=False, sep='\t')
+df_normalized.to_csv('normalized_text.tsv', index=False, sep='\t')

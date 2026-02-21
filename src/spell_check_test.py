@@ -7,6 +7,11 @@ tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-large-char-menaked
 model = AutoModel.from_pretrained('dicta-il/dictabert-large-char-menaked', trust_remote_code=True)
 model.eval()
 
+tokenizer_seg = AutoTokenizer.from_pretrained('dicta-il/dictabert-seg')
+model_seg = AutoModel.from_pretrained('dicta-il/dictabert-seg', trust_remote_code=True)
+
+model_seg.eval()
+
 pspell = Phunspell('he_IL')
 
 texts = [
@@ -72,8 +77,13 @@ def normalize_spelling(text):
     normalized_text = re.sub(r"[\u0591-\u05C7]", '', vocalized_text)
     
     return normalized_text
-    
+
+def normalize_spelling_seg(text):
+    result = model_seg.predict([text], tokenizer_seg)
+    return ' '.join([' '.join(tokens) for tokens in result[0]][1:-1])
+
 for text in texts:
     #text = correct_text(text)
     text = normalize_spelling(text)
+    text = normalize_spelling_seg(text)
     print(text)

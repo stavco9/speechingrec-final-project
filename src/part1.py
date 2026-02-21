@@ -49,4 +49,4 @@ for transription in transciptions:
 
 df_out = pd.DataFrame(transciptions)
 
-df_out.to_csv('transcriptions_new.tsv', sep='\t', index=False)
+df_out.to_csv('transcriptions.tsv', sep='\t', index=False)
