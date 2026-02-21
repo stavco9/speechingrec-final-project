@@ -91,7 +91,9 @@ common_errors = {
     "דגמא": "דגמה",
     "זקינה": "זקנה",
     "חפשיים": "חפשים",
-    "סרנבולות": "תרנגולות"
+    "סרנבולות": "תרנגולות",
+    "מששמעתי": "כאשר שמעתי",
+    "כששמעתי": "כאשר שמעתי"
 }
 
 def handle_common_errors(text, error_dict):
@@ -221,8 +223,8 @@ def handle_connected_words(text):
 
     return text
 
-def normalize_text(text: str, cnt: int):
-    print(f"{str(cnt)}) Before: {text}")
+def normalize_text(text: str, cnt: int, type_of_text: str):
+    print(f"{str(cnt)}) {type_of_text} Before: {text}")
 
     text = text.lower()
  
@@ -259,7 +261,7 @@ def normalize_text(text: str, cnt: int):
 
     text = " ".join(text.split())
 
-    #print(f"{str(cnt)}) After: {text}")
+    print(f"{str(cnt)}) {type_of_text} After: {text}")
 
     return text
 
@@ -271,8 +273,8 @@ normalized_text = []
 statistics_total = AccuracyStatistics()
 
 for index, row in df_in.iterrows():
-    reference_text = normalize_text(row['reference_text'], index+1).split()
-    transcribed_text = normalize_text(row['transcribed_text'], index+1).split()
+    reference_text = normalize_text(row['reference_text'], index+1, 'Reference').split()
+    transcribed_text = normalize_text(row['transcribed_text'], index+1, 'Transcribed').split()
 
     accuracy_statistics = AccuracyStatistics(reference_text, transcribed_text)
     statistics_total += accuracy_statistics
