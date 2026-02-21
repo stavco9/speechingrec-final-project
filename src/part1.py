@@ -38,7 +38,12 @@ for transription in transciptions:
         os.path.join(base_clips_dir, f"{transription['filename']}.mp3"),
         language='he',
         temperature=0.0,
-        beam_size=10)
+        beam_size=10,
+        condition_on_previous_text=False,
+        patience=2.0,
+        length_penalty=1.0,
+        no_speech_threshold=0.1,
+        best_of=10)
 
     texts = [s.text for s in segs]
 
@@ -49,4 +54,4 @@ for transription in transciptions:
 
 df_out = pd.DataFrame(transciptions)
 
-df_out.to_csv('transcriptions.tsv', sep='\t', index=False)
+df_out.to_csv('transcriptions_new.tsv', sep='\t', index=False)

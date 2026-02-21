@@ -93,7 +93,9 @@ common_errors = {
     "חפשיים": "חפשים",
     "סרנבולות": "תרנגולות",
     "מששמעתי": "כאשר שמעתי",
-    "כששמעתי": "כאשר שמעתי"
+    "כששמעתי": "כאשר שמעתי",
+    "שבתוכם": "ש בתוכם",
+    "דריקה": "זריקה"
 }
 
 def handle_common_errors(text, error_dict):
@@ -261,7 +263,7 @@ def normalize_text(text: str, cnt: int, type_of_text: str):
 
     text = " ".join(text.split())
 
-    print(f"{str(cnt)}) {type_of_text} After: {text}")
+    #print(f"{str(cnt)}) {type_of_text} After: {text}")
 
     return text
 
