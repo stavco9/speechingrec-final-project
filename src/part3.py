@@ -39,112 +39,102 @@ numbers_m_to_f = {
     "תשעה עשר": "תשע עשרה"
 }
 
-def numbers_m_to_f_function(text):
-    number_m_one_word = [key for key in numbers_m_to_f.keys() if ' ' not in key]
-    number_f_one_word = [value for value in numbers_m_to_f.values() if ' ' not in value]
-    number_m_two_words = [key for key in numbers_m_to_f.keys() if ' ' in key]
-    number_f_two_words = [value for value in numbers_m_to_f.values() if ' ' in value]
+common_errors = {
+    "יוסילי": "יוסי",
+    "מאד": "מאוד",
+    "אחוז": "אחוזים",
+    "בין לאמיים": "בינלאמיים",
+    "מרצ": "מרץ",
+    "חנאלה": "חנה",
+    "חנהלי": "חנה",
+    "כשבארצות": "שבארצות",
+    "ראיתיה": "ראיתי אותה",
+    "אסמה": "אסם",
+    "בילובסקי": "ברילובסקי",
+    "מענינים": "מעניינים",
+    "מענינות": "מעניינות",
+    "סושה": "סושי",
+    "פסומים": "בשמים",
+    "ספוטיפיי": "ספוטיפי",
+    "סיטראון": "סיטרואן",
+    "סיטואן": "סיטרואן",
+    "קפסו": "קפצו",
+    "ירסנית": "הרסנית",
+    "מהי": "מה היא",
+    "אזבסט": "אסבסט",
+    "רגעיתון": "רגטון",
+    "רגאטון": "רגטון",
+    "מיקרוספוט": "מיקרוסופט",
+    "מליארדים": "מיליארדים",
+    "צמקוני": "צמחוני",
+    "אלטרנטיבים": "אלטרנטיביים",
+    "מונטריות": "מוניטריות",
+    "פלישתים": "פלשתים",
+    "סוריים": "סורים",
+    "רסארים": "רסרים",
+    "רבתים": "רבטים",
+    "יהוה": "ה",
+    "נורוגי": "נורבגי",
+    "יספלו": "יסבלו",
+    "תהא": "תהיה",
+}
+
+def handle_common_errors(text, error_dict):
+    # Separate single-word and multi-word errors
+    errors_one_word = {error: correction for error, correction in error_dict.items() if ' ' not in error}
+    errors_two_words = {error: correction for error, correction in error_dict.items() if ' ' in error}
 
     new_text = []
 
     skip = False
 
     for current_word, next_word in zip(text.split(), text.split()[1:]):
+        old_word = current_word
         if skip:
             skip = False
+            print(f"Replacing: {old_word} -> ''")
             continue
         
-        for m_number, f_number in zip(number_m_two_words, number_f_two_words):
-            if f"{current_word} {next_word}".endswith(f_number):
+        for error, correction in errors_two_words.items():
+            if f"{current_word} {next_word}".endswith(correction):
                 skip = True
                 current_word = current_word + ' ' + next_word
                 break
-            elif f"{current_word} {next_word}".endswith(m_number):
+            elif f"{current_word} {next_word}".endswith(error):
                 skip = True
-                current_word = current_word.replace(m_number.split()[0], f_number.split()[0])
-                next_word = next_word.replace(m_number.split()[1], f_number.split()[1])
-                current_word = current_word + ' ' + next_word
+                if len(correction.split()) == 1:
+                    current_word = current_word.replace(error.split()[0], correction)
+                else:
+                    current_word = current_word.replace(error.split()[0], correction.split()[0])
+                    next_word = next_word.replace(error.split()[1], correction.split()[1])
+                    current_word = current_word + ' ' + next_word
                 break
+        
+        # Check for single-word errors if no multi-word error was found
         if not skip:
-            for m_number, f_number in zip(number_m_one_word, number_f_one_word):
-                if current_word.endswith(f_number):
+            for error, correction in errors_one_word.items():
+                if current_word.endswith(error):
+                    current_word = current_word.replace(error, correction)
                     break
-                elif current_word.endswith(m_number):
-                    current_word = current_word.replace(m_number, f_number)
-                    break
+        if old_word != current_word:
+            print(f"Replacing: {old_word} -> {current_word}")
         new_text.append(current_word)
+    
+
+    old_word = text.split()[-1]
+    # Handle the last word
     if not skip:
         current_word = text.split()[-1]
-        for m_number, f_number in zip(number_m_one_word, number_f_one_word):
-            if current_word.endswith(f_number):
+        for error, correction in errors_one_word.items():
+            if current_word.endswith(error):
+                current_word = current_word.replace(error, correction)
                 break
-            elif current_word.endswith(m_number):
-                current_word = current_word.replace(m_number, f_number)
-                break
+        if old_word != current_word:
+            print(f"Replacing: {old_word} -> {current_word}")
         new_text.append(current_word)
+    else:
+        print(f"Replacing: {old_word} -> ''")
     return ' '.join(new_text)
-
-common_errors = [{
-        "error": "יוסילי",
-        "correction": "יוסי"
-    },{
-        "error": "מאד",
-        "correction": "מאוד"
-    },{
-        "error": "אחוז",
-        "correction": "אחוזים"
-    },{
-        "error": "בין לאמיים",
-        "correction": "בינלאמיים"
-    },{
-        "error": "הבין לאמיים",
-        "correction": "הבינלאמיים"
-    },{
-        "error": "מרצ",
-        "correction": "מרץ"
-    },{
-        "error": "חנאלה",
-        "correction": "חנה"
-    },{
-        "error": "חנהלי",
-        "correction": "חנה"
-    },{
-        "error": "כשבארצות",
-        "correction": "שבארצות"
-    },{
-        "error": "ראיתיה",
-        "correction": "ראיתי אותה"
-    },{
-        "error": "אסמה",
-        "correction": "אסם"
-    },{
-        "error": "בילובסקי",
-        "correction": "ברילובסקי"
-    },{
-        "error": "מענינים",
-        "correction": "מעניינים"
-    },{
-        "error": "מענינות",
-        "correction": "מעניינות"
-    },{
-        "error": "סושה",
-        "correction": "סושי"
-    },{
-        "error": "בספוטיפיי",
-        "correction": "בספוטיפי"
-    },{
-        "error": "וסיטראון",
-        "correction": "וסיטרואן"
-    },{
-        "error": "וסיטואן",
-        "correction": "וסיטרואן"
-    },{
-        "error": "קפסו",
-        "correction": "קפצו"
-    },{
-        "error": "ירסנית",
-        "correction": "הרסנית"
-    }]
 
 #phunspell_storage_path = os.path.join(os.path.dirname(__file__), '..', 'phunspell-dict')
 pspell = Phunspell('he_IL')
@@ -164,7 +154,7 @@ def number_to_words(text):
     numbers_in_text = re.findall(r'\d+', text)
     for number in numbers_in_text:
         text = text.replace(number, num2words(number, lang='he'))
-    text = numbers_m_to_f_function(text)
+    text = handle_common_errors(text, numbers_m_to_f)
     return text
 
 def normalize_spelling(text):
@@ -221,7 +211,7 @@ def normalize_text(text: str, cnt: int):
 
     text = text.lower()
  
-    text = re.sub('[!?.,:;()"״]', '', text)
+    text = re.sub('[!?.,:;()"“״]', '', text)
     text = text.replace('%', ' אחוזים ')
     text = re.sub('[-–־—]', ' ', text)
 
@@ -241,14 +231,11 @@ def normalize_text(text: str, cnt: int):
 
     #print(f"{str(cnt)}) After normalize spelling: {text}")
 
-    text = re.sub('[!?.,:;()"״’\']', '', text)
+    text = re.sub('[!?.,:;()"“״’‘\']', '', text)
     text = re.sub('[-–־—]', ' ', text)
     
     # Add leading and trailing spaces to replace also words that are at the beginning or end of the text
-    text = ' ' + text + ' '
-    for error in common_errors:
-        text = text.replace(f" {error['error']} ", f" {error['correction']} ")
-
+    text = handle_common_errors(text, common_errors)
     #print(f"{str(cnt)}) After common errors: {text}")
 
     text = normalize_spelling_seg(text)
@@ -277,7 +264,7 @@ for index, row in df_in.iterrows():
     statistics.append({'filename': row['filename'], **accuracy_statistics.to_dict()})
     normalized_text.append({'filename': row['filename'], 'reference_text': ' '.join(reference_text), 'transcribed_text': ' '.join(transcribed_text)})
 
-for word_pair, num in statistics_total.frequent_errors(k=100):
+for word_pair, num in statistics_total.frequent_errors(k=200):
     print('-> "%s" replaced by "%s" %d times.' %
     (word_pair[0], word_pair[1], num))
 
