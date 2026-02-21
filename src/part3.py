@@ -111,6 +111,39 @@ common_errors = [{
     },{
         "error": "כשבארצות",
         "correction": "שבארצות"
+    },{
+        "error": "ראיתיה",
+        "correction": "ראיתי אותה"
+    },{
+        "error": "אסמה",
+        "correction": "אסם"
+    },{
+        "error": "בילובסקי",
+        "correction": "ברילובסקי"
+    },{
+        "error": "מענינים",
+        "correction": "מעניינים"
+    },{
+        "error": "מענינות",
+        "correction": "מעניינות"
+    },{
+        "error": "סושה",
+        "correction": "סושי"
+    },{
+        "error": "בספוטיפיי",
+        "correction": "בספוטיפי"
+    },{
+        "error": "וסיטראון",
+        "correction": "וסיטרואן"
+    },{
+        "error": "וסיטואן",
+        "correction": "וסיטרואן"
+    },{
+        "error": "קפסו",
+        "correction": "קפצו"
+    },{
+        "error": "ירסנית",
+        "correction": "הרסנית"
     }]
 
 #phunspell_storage_path = os.path.join(os.path.dirname(__file__), '..', 'phunspell-dict')
@@ -244,7 +277,7 @@ for index, row in df_in.iterrows():
     statistics.append({'filename': row['filename'], **accuracy_statistics.to_dict()})
     normalized_text.append({'filename': row['filename'], 'reference_text': ' '.join(reference_text), 'transcribed_text': ' '.join(transcribed_text)})
 
-for word_pair, num in statistics_total.frequent_errors(k=50):
+for word_pair, num in statistics_total.frequent_errors(k=100):
     print('-> "%s" replaced by "%s" %d times.' %
     (word_pair[0], word_pair[1], num))
 
