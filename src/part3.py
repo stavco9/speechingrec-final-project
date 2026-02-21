@@ -13,6 +13,96 @@ tokenizer = AutoTokenizer.from_pretrained('dicta-il/dictabert-large-char-menaked
 model = AutoModel.from_pretrained('dicta-il/dictabert-large-char-menaked', trust_remote_code=True)
 model.eval()
 
+numbers_m_to_f = {
+    "אחד": "אחת",
+    "שניים": "שתיים",
+    "שלושה": "שלוש",
+    "ארבעה": "ארבע",
+    "חמישה": "חמש",
+    "שישה": "שש",
+    "שבעה": "שבע",
+    "שמונה": "שמונה",
+    "תשעה": "תשע",
+    "עשרה": "עשר",
+    "אחד עשר": "אחת עשרה",
+    "שנים עשר": "שתים עשרה",
+    "שלושה עשר": "שלוש עשרה",
+    "ארבעה עשר": "ארבע עשרה",
+    "חמישה עשר": "חמש עשרה",
+    "שישה עשר": "שש עשרה",
+    "שבעה עשר": "שבע עשרה",
+    "שמונה עשר": "שמונה עשרה",
+    "תשעה עשר": "תשע עשרה"
+}
+
+def numbers_m_to_f_function(text):
+    number_m_one_word = [key for key in numbers_m_to_f.keys() if ' ' not in key]
+    number_f_one_word = [value for value in numbers_m_to_f.values() if ' ' not in value]
+    number_m_two_words = [key for key in numbers_m_to_f.keys() if ' ' in key]
+    number_f_two_words = [value for value in numbers_m_to_f.values() if ' ' in value]
+
+    new_text = []
+
+    skip = False
+
+    for current_word, next_word in zip(text.split(), text.split()[1:]):
+        if skip:
+            skip = False
+            continue
+        
+        for m_number, f_number in zip(number_m_two_words, number_f_two_words):
+            if f"{current_word} {next_word}".endswith(f_number):
+                skip = True
+                current_word = current_word + ' ' + next_word
+                break
+            elif f"{current_word} {next_word}".endswith(m_number):
+                skip = True
+                current_word = current_word.replace(m_number.split()[0], f_number.split()[0])
+                next_word = next_word.replace(m_number.split()[1], f_number.split()[1])
+                current_word = current_word + ' ' + next_word
+                break
+        if not skip:
+            for m_number, f_number in zip(number_m_one_word, number_f_one_word):
+                if current_word.endswith(f_number):
+                    break
+                elif current_word.endswith(m_number):
+                    current_word = current_word.replace(m_number, f_number)
+                    break
+        new_text.append(current_word)
+    if not skip:
+        current_word = text.split()[-1]
+        for m_number, f_number in zip(number_m_one_word, number_f_one_word):
+            if current_word.endswith(f_number):
+                break
+            elif current_word.endswith(m_number):
+                current_word = current_word.replace(m_number, f_number)
+                break
+        new_text.append(current_word)
+    return ' '.join(new_text)
+
+common_errors = [{
+       "error": "התה",
+       "correction": "הייתה"
+    },{
+        "error": "יוסילי",
+        "correction": "יוסי"
+    },{
+        "error": "מאד",
+        "correction": "מאוד"
+    },{
+        "error": "אחוז",
+        "correction": "אחוזים"
+    },{
+        "error": "בין לאמיים",
+        "correction": "בינלאמיים"
+    },{
+        "error": "הבין לאמיים",
+        "correction": "הבינלאמיים"
+    },{
+        "error": "מרצ",
+        "correction": "מרץ"
+    }]
+
 #phunspell_storage_path = os.path.join(os.path.dirname(__file__), '..', 'phunspell-dict')
 pspell = Phunspell('he_IL')
 
@@ -29,6 +119,24 @@ def get_base_forms(text):
     predictions = model.predict([text], tokenizer)
     # Extract the 'lex' field for each word
     return " ".join([token[1] for token in predictions[0]])
+
+def normalize_hours(text):
+    for i, word in enumerate(text.split()):
+        if word.endswith("שעה"):
+            if i+1 < len(text.split()) and text.split()[i+1].isnumeric():
+                original_number = int(text.split()[i+1])
+                new_number = original_number if original_number <= 12 else original_number - 12
+                text = text.replace(str(original_number), str(new_number))
+
+    return text
+
+def number_to_words(text):
+    text = normalize_hours(text)
+    numbers_in_text = re.findall(r'\d+', text)
+    for number in numbers_in_text:
+        text = text.replace(number, num2words(number, lang='he'))
+    text = numbers_m_to_f_function(text)
+    return text
 
 def normalize_spelling(text):
     # The predict method returns the text with Niqqud, 
@@ -75,9 +183,8 @@ def handle_connected_words(text):
 
     return text
 
-def normalize_text(text: str, filename: str):
-    #if filename == 'common_voice_he_39897724':
-    print(f"Before: {text}")
+def normalize_text(text: str, cnt: int):
+    print(f"{str(cnt)}) Before: {text}")
 
     text = text.lower()
     #’\'
@@ -85,14 +192,11 @@ def normalize_text(text: str, filename: str):
     text = text.replace('%', ' אחוזים ')
     text = re.sub('[-–־—]', ' ', text)
 
-    numbers_in_text = re.findall(r'\d+', text)
-    for number in numbers_in_text:
-        text = text.replace(number, num2words(number, lang='he'))
-
-    text = re.sub('[-–־—]', ' ', text)
-
     # Remove Hebrew Nikkud
     text = re.sub('[\u0591-\u05C7]+', '', text)
+
+    text = number_to_words(text)
+    text = re.sub('[-–־—]', ' ', text)
 
     #text = correct_text(text)
     
@@ -105,11 +209,12 @@ def normalize_text(text: str, filename: str):
     text = re.sub('[!?.,:;()"״’\']', '', text)
     text = re.sub('[-–־—]', ' ', text)
 
-    text = text.replace('התה', 'הייתה')
+    for error in common_errors:
+        text = text.replace(f" {error['error']} ", f" {error['correction']} ")
 
     text = " ".join(text.split())
 
-    print(f"After: {text}")
+    print(f"{str(cnt)}) After: {text}")
 
     return text
 
@@ -120,10 +225,10 @@ normalized_text = []
 
 statistics_total = AccuracyStatistics()
 
-for _, row in df_in.iterrows():
+for index, row in df_in.iterrows():
 
-    reference_text = normalize_text(row['reference_text'], row['filename']).split()
-    transcribed_text = normalize_text(row['transcribed_text'], row['filename']).split()
+    reference_text = normalize_text(row['reference_text'], index+1).split()
+    transcribed_text = normalize_text(row['transcribed_text'], index+1).split()
 
     accuracy_statistics = AccuracyStatistics(reference_text, transcribed_text)
     statistics_total += accuracy_statistics
