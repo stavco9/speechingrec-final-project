@@ -85,9 +85,6 @@ def numbers_m_to_f_function(text):
     return ' '.join(new_text)
 
 common_errors = [{
-       "error": "התה",
-       "correction": "הייתה"
-    },{
         "error": "יוסילי",
         "correction": "יוסי"
     },{
@@ -105,6 +102,15 @@ common_errors = [{
     },{
         "error": "מרצ",
         "correction": "מרץ"
+    },{
+        "error": "חנאלה",
+        "correction": "חנה"
+    },{
+        "error": "חנהלי",
+        "correction": "חנה"
+    },{
+        "error": "כשבארצות",
+        "correction": "שבארצות"
     }]
 
 #phunspell_storage_path = os.path.join(os.path.dirname(__file__), '..', 'phunspell-dict')
@@ -192,20 +198,33 @@ def normalize_text(text: str, cnt: int):
     text = number_to_words(text)
     text = re.sub('[-–־—]', ' ', text)
     
+    #print(f"{str(cnt)}) After number to words: {text}")
+
     text = handle_connected_words(text)
+
+    #print(f"{str(cnt)}) After handle connected words: {text}")
+
     text = normalize_spelling(text)
+
+    #print(f"{str(cnt)}) After normalize spelling: {text}")
 
     text = re.sub('[!?.,:;()"״’\']', '', text)
     text = re.sub('[-–־—]', ' ', text)
-
+    
+    # Add leading and trailing spaces to replace also words that are at the beginning or end of the text
+    text = ' ' + text + ' '
     for error in common_errors:
         text = text.replace(f" {error['error']} ", f" {error['correction']} ")
 
+    #print(f"{str(cnt)}) After common errors: {text}")
+
     text = normalize_spelling_seg(text)
+
+    #print(f"{str(cnt)}) After normalize spelling seg: {text}")
 
     text = " ".join(text.split())
 
-    print(f"{str(cnt)}) After: {text}")
+    #print(f"{str(cnt)}) After: {text}")
 
     return text
 
@@ -217,7 +236,6 @@ normalized_text = []
 statistics_total = AccuracyStatistics()
 
 for index, row in df_in.iterrows():
-
     reference_text = normalize_text(row['reference_text'], index+1).split()
     transcribed_text = normalize_text(row['transcribed_text'], index+1).split()
 
