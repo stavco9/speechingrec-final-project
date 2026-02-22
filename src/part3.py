@@ -95,7 +95,8 @@ common_errors = {
     "מששמעתי": "כאשר שמעתי",
     "כששמעתי": "כאשר שמעתי",
     "שבתוכם": "ש בתוכם",
-    "דריקה": "זריקה"
+    "דריקה": "זריקה",
+    "תטמיח": "תצמיח"
 }
 
 def handle_common_errors(text, error_dict):
@@ -183,7 +184,6 @@ def normalize_spelling(text):
     result = model_large_char_menaked.predict([text], tokenizer_large_char_menaked)
     
     # The output has Niqqud. To compare for WER, we strip the Niqqud back off.
-    import re
     vocalized_text = result[0]
     normalized_text = re.sub(r"[\u0591-\u05C7]", '', vocalized_text)
     
@@ -267,7 +267,7 @@ def normalize_text(text: str, cnt: int, type_of_text: str):
 
     return text
 
-df_in = pd.read_csv('transcriptions.tsv', sep='\t')
+df_in = pd.read_csv('transcriptions_new.tsv', sep='\t')
 
 statistics = []
 normalized_text = []
@@ -299,7 +299,7 @@ df_out = df_out.concat(df_additional)
 
 df_out.display()
 
-df_out.save('statistics_normalized.csv')
+df_out.save('statistics_normalized_new.csv')
 
 df_normalized = pd.DataFrame(normalized_text)
-df_normalized.to_csv('normalized_text.tsv', index=False, sep='\t')
+df_normalized.to_csv('normalized_text_new.tsv', index=False, sep='\t')
