@@ -230,7 +230,7 @@ def normalize_text(text: str, cnt: int, type_of_text: str):
 
     text = text.lower()
  
-    text = re.sub('[!?.,:;()"“״]', '', text)
+    text = re.sub('[!?.,:;()"”“״]', '', text)
     text = text.replace('%', ' אחוזים ')
     text = re.sub('[-–־—]', ' ', text)
 
@@ -250,7 +250,7 @@ def normalize_text(text: str, cnt: int, type_of_text: str):
 
     #print(f"{str(cnt)}) After normalize spelling: {text}")
 
-    text = re.sub('[!?.,:;()"“״’‘\']', '', text)
+    text = re.sub('[!?.,:;()"”“״’‘\']', '', text)
     text = re.sub('[-–־—]', ' ', text)
     
     # Add leading and trailing spaces to replace also words that are at the beginning or end of the text
