@@ -39,10 +39,13 @@ numbers_m_to_f = {
     "תשעה עשר": "תשע עשרה"
 }
 
-pre_normalization_corrections = {
+pre_normalization_corrections_force_equality = {
     "פניי": "הפנים שלי",
-    "פנייך": "הפנים שלך",
-    "ביתו": "הבית שלו",
+    "פנייך": "הפנים שלך"
+}
+
+pre_normalization_corrections = {
+    "בביתו": "בבית שלו",
     "שבתוכם": "ש בתוכם",
     "הפעולה": "ה פעולה",
     "בין לאומיים": "בינלאומיים",
@@ -105,7 +108,8 @@ post_normalization_corrections = {
     "תטמיח": "תצמיח",
     "התהלק": "התהלך",
     "הריהו": "הרי הוא",
-    "נשתתקו": "השתתקו"
+    "נשתתקו": "השתתקו",
+    "בלביה": "בלגיה"
 }
 
 # Wrong post prefix segmentation corrections which we must fix manually
@@ -113,6 +117,9 @@ post_prefix_seg_corrections = {
     "ה כי": "הכי",
     "ב היל": "בהיל",
     "ל גרים": "לגרים",
+    "ל הפתיד": "להפתיד",
+    "ה חיש": "החיש",
+    "ו אג": "ואג",
     "ול": "ו ל",
     "וה": "ו ה",
     "שה": "ש ה",
@@ -120,8 +127,7 @@ post_prefix_seg_corrections = {
     "ומ": "ו מ",
     "כש": "כ ש",
     "משם": "מ שם",
-    "מאז": "מ אז",
-    "ו אג": "ואג"
+    "מאז": "מ אז"
 }
 
 def handle_common_errors(text, error_dict, check_absolute_equality=False):
@@ -274,7 +280,8 @@ def normalize_text(text: str, cnt: int, type_of_text: str):
     text = handle_connected_words(text)
 
     #print(f"{str(cnt)}) After handle connected words: {text}")
-
+   
+    text = handle_common_errors(text, pre_normalization_corrections_force_equality, check_absolute_equality=True)
     text = handle_common_errors(text, pre_normalization_corrections)
 
     text = normalize_spelling(text)
