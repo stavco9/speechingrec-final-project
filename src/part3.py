@@ -39,11 +39,18 @@ numbers_m_to_f = {
     "תשעה עשר": "תשע עשרה"
 }
 
-common_errors = {
+pre_normalization_corrections = {
+    "פניי": "הפנים שלי",
+    "פנייך": "הפנים שלך",
+    "שבתוכם": "ש בתוכם",
+    "הפעולה": "ה פעולה",
+    "בין לאומיים": "בינלאומיים"
+}
+
+post_normalization_corrections = {
     "יוסילי": "יוסי",
     "מאד": "מאוד",
     "אחוז": "אחוזים",
-    "בין לאמיים": "בינלאמיים",
     "מרצ": "מרץ",
     "חנאלה": "חנה",
     "חנהלי": "חנה",
@@ -94,12 +101,19 @@ common_errors = {
     "סרנבולות": "תרנגולות",
     "מששמעתי": "כאשר שמעתי",
     "כששמעתי": "כאשר שמעתי",
-    "שבתוכם": "ש בתוכם",
     "דריקה": "זריקה",
-    "תטמיח": "תצמיח"
+    "תטמיח": "תצמיח",
+    "התהלק": "התהלך",
+    "הריהו": "הרי הוא"
 }
 
-def handle_common_errors(text, error_dict):
+# Wrong post prefix segmentation corrections which we must fix manually
+post_prefix_seg_corrections = {
+    "ה כי": "הכי",
+    "ב היל": "בהיל"
+}
+
+def handle_common_errors(text, error_dict, check_absolute_equality=False):
     # Separate single-word and multi-word errors
     errors_one_word = {error: correction for error, correction in error_dict.items() if ' ' not in error}
     errors_two_words = {error: correction for error, correction in error_dict.items() if ' ' in error}
@@ -116,11 +130,13 @@ def handle_common_errors(text, error_dict):
             continue
         
         for error, correction in errors_two_words.items():
-            if f"{current_word} {next_word}".endswith(correction):
+            if (f"{current_word} {next_word}".endswith(correction) and not check_absolute_equality) \
+            or (f"{current_word} {next_word}" == correction and check_absolute_equality):
                 skip = True
                 current_word = current_word + ' ' + next_word
                 break
-            elif f"{current_word} {next_word}".endswith(error):
+            elif (f"{current_word} {next_word}".endswith(error) and not check_absolute_equality) \
+            or (f"{current_word} {next_word}" == error and check_absolute_equality):
                 skip = True
                 if len(correction.split()) == 1:
                     current_word = current_word.replace(error.split()[0], correction)
@@ -133,7 +149,8 @@ def handle_common_errors(text, error_dict):
         # Check for single-word errors if no multi-word error was found
         if not skip:
             for error, correction in errors_one_word.items():
-                if current_word.endswith(error):
+                if (current_word.endswith(error) and not check_absolute_equality) \
+                or (current_word == error and check_absolute_equality):
                     current_word = current_word.replace(error, correction)
                     break
         if old_word != current_word:
@@ -146,7 +163,8 @@ def handle_common_errors(text, error_dict):
     if not skip:
         current_word = text.split()[-1]
         for error, correction in errors_one_word.items():
-            if current_word.endswith(error):
+            if (current_word.endswith(error) and not check_absolute_equality) \
+            or (current_word == error and check_absolute_equality):
                 current_word = current_word.replace(error, correction)
                 break
         if old_word != current_word:
@@ -246,6 +264,8 @@ def normalize_text(text: str, cnt: int, type_of_text: str):
 
     #print(f"{str(cnt)}) After handle connected words: {text}")
 
+    text = handle_common_errors(text, pre_normalization_corrections)
+
     text = normalize_spelling(text)
 
     #print(f"{str(cnt)}) After normalize spelling: {text}")
@@ -254,10 +274,12 @@ def normalize_text(text: str, cnt: int, type_of_text: str):
     text = re.sub('[-–־—]', ' ', text)
     
     # Add leading and trailing spaces to replace also words that are at the beginning or end of the text
-    text = handle_common_errors(text, common_errors)
+    text = handle_common_errors(text, post_normalization_corrections)
     #print(f"{str(cnt)}) After common errors: {text}")
 
     text = normalize_spelling_seg(text)
+
+    text = handle_common_errors(text, post_prefix_seg_corrections, check_absolute_equality=True)
 
     #print(f"{str(cnt)}) After normalize spelling seg: {text}")
 
