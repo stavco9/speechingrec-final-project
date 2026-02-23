@@ -42,6 +42,7 @@ numbers_m_to_f = {
 pre_normalization_corrections = {
     "פניי": "הפנים שלי",
     "פנייך": "הפנים שלך",
+    "ביתו": "הבית שלו",
     "שבתוכם": "ש בתוכם",
     "הפעולה": "ה פעולה",
     "בין לאומיים": "בינלאומיים",
@@ -116,7 +117,10 @@ post_prefix_seg_corrections = {
     "וה": "ו ה",
     "שה": "ש ה",
     "וב": "ו ב",
+    "ומ": "ו מ",
     "כש": "כ ש",
+    "משם": "מ שם",
+    "מאז": "מ אז",
     "ו אג": "ואג"
 }
 
@@ -321,6 +325,14 @@ statistics_avg = {k: v / len(statistics) for k, v in statistics_total.to_dict().
 df_out = StatisticsDF(statistics)
 
 df_out = df_out.sort_values(by=['wer'], ascending=False)
+
+df_out_files = df_out.df['filename'].tolist()
+
+# Sort normalized_text to match the order of df_out_files
+# Create a mapping from filename to index in df_out_files
+filename_to_index = {filename: index for index, filename in enumerate(df_out_files)}
+# Sort normalized_text based on the order in df_out_files
+normalized_text = sorted(normalized_text, key=lambda x: filename_to_index.get(x['filename'], float('inf')))
 
 df_additional = StatisticsDF([{'filename': 'TOTAL', **statistics_total.to_dict()},
    {'filename': 'AVERAGE', **statistics_avg}])
