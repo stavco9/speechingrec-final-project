@@ -1,8 +1,9 @@
 import pandas as pd
-from statistics_df import StatisticsDF
-from accuracy_statistics import AccuracyStatistics
+import os
+from modules.statistics_df import StatisticsDF
+from modules.accuracy_statistics import AccuracyStatistics
 
-df_in = pd.read_csv('transcriptions.tsv', sep='\t')
+df_in = pd.read_csv(os.path.join('results', 'part1_transcriptions.tsv'), sep='\t')
 
 statistics = []
 
@@ -28,4 +29,4 @@ df_out = StatisticsDF(statistics)
 
 df_out.display()
 
-df_out.save('statistics_origin.csv')
+df_out.save(os.path.join('results', 'part2_statistics.csv'))

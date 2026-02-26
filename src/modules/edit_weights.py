@@ -66,7 +66,7 @@ class NestedUniformWeights(GeneralEditWeights):
         if first_obj == second_obj:
             return self.match_weight * len(first_obj)
         else:
-            from align_sequences import align_sequences
+            from modules.align_sequences import align_sequences
             return align_sequences(first_obj, second_obj, UniformWeights())[0]
     
     def insertion_weight(self, obj) -> float:

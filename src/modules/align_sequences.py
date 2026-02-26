@@ -1,6 +1,6 @@
 from typing import Iterable, List, Tuple
 import numpy as np
-from edit_weights import EditWeights, NestedUniformWeights
+from modules.edit_weights import EditWeights
 
 def align_sequences(first_seq: Iterable,
                     second_seq: Iterable,

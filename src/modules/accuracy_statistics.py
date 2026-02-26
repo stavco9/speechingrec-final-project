@@ -1,5 +1,5 @@
-from align_sequences import align_sequences
-from edit_weights import NestedUniformWeights
+from modules.align_sequences import align_sequences
+from modules.edit_weights import NestedUniformWeights
 from collections import Counter
 from typing import List, Tuple
 
