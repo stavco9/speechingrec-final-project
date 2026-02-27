@@ -8,9 +8,9 @@ import os
 import faster_whisper
 
 # Configuration
-TEST_TSV = "cv-corpus-24.0-2025-12-05/he/test.tsv"
-NOISY_CLIPS_DIR = "noisy_clips"
-OUTPUT_FILE = "part4_noisy_transcriptions.tsv"
+TEST_TSV = "../cv-corpus-24.0-2025-12-05/he/test.tsv"
+NOISY_CLIPS_DIR = "../musan/noisy_clips"
+OUTPUT_FILE = "results/part4_noisy_transcriptions.tsv"
 
 # Load Whisper model
 model = faster_whisper.WhisperModel('ivrit-ai/whisper-large-v3-turbo-ct2')
