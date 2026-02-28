@@ -6,11 +6,11 @@ from scipy.signal import decimate
 
 
 # Configuration
-TEST_TSV = "cv-corpus-24.0-2025-12-05/he/test.tsv"
-CLIPS_DIR = "cv-corpus-24.0-2025-12-05/he/clips"
-NOISE_DIR = "noise/free-sound"
-OUTPUT_DIR = "noisy_clips"
-LOG_FILE = "part4_augmentation_log.tsv"
+TEST_TSV = "../cv-corpus-24.0-2025-12-05/he/test.tsv"
+CLIPS_DIR = "../cv-corpus-24.0-2025-12-05/he/clips"
+NOISE_DIR = "../musan/noise/free-sound"
+OUTPUT_DIR = "../musan/noisy_clips"
+LOG_FILE = "results/part4_augmentation_log.tsv"
 
 # Settings for result 0 (digits modulo 6)
 SIGNAL_TYPE = "noise"  # רעש
