@@ -56,10 +56,10 @@ df_out = df_out.concat(df_summary)
 
 df_out.display()
 
-df_out.save(os.path.join('results', 'part3_statistics_tmp.csv'))
+df_out.save(os.path.join('results', 'part3_statistics.csv'))
 
 df_normalized = pd.DataFrame(normalized_text)
-df_normalized.to_csv(os.path.join('results', 'part3_transcriptions_tmp.tsv'), index=False, sep='\t')
+df_normalized.to_csv(os.path.join('results', 'part3_transcriptions.tsv'), index=False, sep='\t')
 
 with open(os.path.join('results', 'part3_corrections_tmp.txt'), 'w', encoding='utf-8') as f:
     for cnt, word, corrected_word in normalize.corrections:
