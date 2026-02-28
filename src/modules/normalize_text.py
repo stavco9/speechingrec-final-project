@@ -1,8 +1,9 @@
 import re
 
 from num2words import num2words
-from transformers import AutoTokenizer, AutoModel 
+from transformers import AutoTokenizer, AutoModel
 from consts.correction_dict import CorrectionDict
+from phunspell import Phunspell
 
 class NormalizeText:
     def __init__(self):
@@ -14,6 +15,10 @@ class NormalizeText:
         self.tokenizer_seg = AutoTokenizer.from_pretrained('dicta-il/dictabert-seg')
         self.model_seg = AutoModel.from_pretrained('dicta-il/dictabert-seg', trust_remote_code=True)
         self.model_seg.eval()
+
+        self.phunspell = Phunspell('he_IL')
+
+        self.corrections = []
 
         self.correction_dict = CorrectionDict()
     
@@ -108,6 +113,21 @@ class NormalizeText:
         
         return normalized_text
 
+    def _correct_text(self, text: str, cnt: int) -> str:
+        list_correct = []
+        for word in text.split():
+            # Check if word ends with any word in hebrew_correct_oov_words
+            ends_with_oov = any(word.endswith(oov_word) for oov_word in self.correction_dict.hebrew_correct_oov_words)
+            if not self.phunspell.lookup(word) and not ends_with_oov:
+                corrected_word = next(self.phunspell.suggest(word), word)
+                print(f"{str(cnt)}) -> '%s' corrected to '%s'" % (word, corrected_word))
+                self.corrections.append((cnt, word, corrected_word))
+                list_correct.append(corrected_word)
+            else:
+                list_correct.append(word)
+        text = ' '.join(list_correct)
+        return text
+
     def _normalize_spelling_seg(self, text: str) -> str:
         result = self.model_seg.predict([text], self.tokenizer_seg)
         return ' '.join([' '.join(tokens) for tokens in result[0]][1:-1])
@@ -167,12 +187,20 @@ class NormalizeText:
         text = re.sub('[!?.,:;()"”“״’‘\']', '', text)
         text = re.sub('[-–־—]', ' ', text)
         
+        text = self._handle_common_errors(
+            text,
+            self.correction_dict.post_normalization_corrections_force_equality,
+            check_absolute_equality=True
+        )
+
         # Add leading and trailing spaces to replace also words that are at the beginning or end of the text
         text = self._handle_common_errors(
             text,
             self.correction_dict.post_normalization_corrections
         )
         
+        text = self._correct_text(text, cnt)
+
         text = self._normalize_spelling_seg(text)
 
         text = self._handle_common_errors(text, self.correction_dict.post_prefix_seg_corrections, check_absolute_equality=True)
