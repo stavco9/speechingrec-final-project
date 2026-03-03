@@ -4,7 +4,8 @@ import random
 import numpy as np
 import soundfile as sf
 from scipy.signal import decimate
-
+from part1 import Part1
+from part2 import Part2
 
 # Configuration
 TEST_TSV = "../cv-corpus-24.0-2025-12-05/he/test.tsv"
@@ -12,6 +13,9 @@ CLIPS_DIR = "../cv-corpus-24.0-2025-12-05/he/clips"
 NOISE_DIR = "../musan/noise/free-sound"
 OUTPUT_DIR = "../musan/noisy_clips"
 LOG_FILE = "results/part4_augmentation_log.tsv"
+NOISY_TRANSCRIPTIONS_FILE = "results/part4_noisy_transcriptions.tsv"
+STATISTICS_FILE = "results/part4_statistics.csv"
+NORMALIZED_TRANSCRIPTIONS_FILE = "results/part4_normalized_transcriptions.tsv"
 
 # Settings for result 0 (digits modulo 6)
 SIGNAL_TYPE = "noise"  # רעש
@@ -173,6 +177,31 @@ def main():
         for entry in log_entries:
             f.write('\t'.join(entry) + '\n')
 
+    part1 = Part1(
+        referenced_file=TEST_TSV,
+        base_clips_dir=OUTPUT_DIR,
+        output_file=NOISY_TRANSCRIPTIONS_FILE
+    )
+    video_format = part1.read_referenced_file()
+    part1.transcribe_clips(video_format)
+    part1.save_transcriptions()
+
+    part2 = Part2(
+        input_transcriptions_file=NOISY_TRANSCRIPTIONS_FILE,
+        output_statistics_file=STATISTICS_FILE,
+        output_transcriptions_file=NORMALIZED_TRANSCRIPTIONS_FILE
+    )
+    statistics_total = part2.process_transcriptions(to_normalize=True)
+    part2.save_statistics(statistics_total)
+
+def main2():
+    part2 = Part2(
+        input_transcriptions_file=NOISY_TRANSCRIPTIONS_FILE,
+        output_statistics_file=STATISTICS_FILE,
+        output_transcriptions_file=NORMALIZED_TRANSCRIPTIONS_FILE
+    )
+    statistics_total = part2.process_transcriptions(to_normalize=True)
+    part2.save_statistics(statistics_total)
 
 if __name__ == "__main__":
-    main()
+    main2()

@@ -2,60 +2,89 @@ import os
 import faster_whisper
 import pandas as pd
 
-# Read the Ground Truth file
-referenced_file = os.path.join("..", "cv-corpus-24.0-2025-12-05", "he", "test.tsv")
 
-# Load the Whisper model
-model = faster_whisper.WhisperModel('ivrit-ai/whisper-large-v3-turbo-ct2')
+class Part1:
+    def __init__(self, referenced_file: str, base_clips_dir: str, output_file: str):
+        # Set the referenced file and the base clips directory
+        self.referenced_file = referenced_file
+        self.base_clips_dir = base_clips_dir
+        self.output_file = output_file
+        
+        # Load the Whisper model
+        self.model = faster_whisper.WhisperModel('ivrit-ai/whisper-large-v3-turbo-ct2')
 
-# Set the base directory for the clips
-base_clips_dir = os.path.join("..", "cv-corpus-24.0-2025-12-05", "he", "clips")
+        # List to store the transcriptions
+        self.transciptions = []
 
-# List to store the transcriptions
-transciptions = []
+    def read_referenced_file(self):
+        # Read the Ground Truth file
+        df_in = pd.read_csv(self.referenced_file, sep='\t')
 
-# Read the Ground Truth file
-df_in = pd.read_csv(referenced_file, sep='\t')
+        # Get the video format from the first row of the Ground Truth file
+        video_format = df_in.iloc[0]['path'].split('.')[-1]
+        print(f"Video format: {video_format}")
 
-# Iterate over the rows of the Ground Truth file
-for _, row in df_in.iterrows():        
-    # Add the filename and the reference text to the list of transcriptions
-    transciptions.append({
-        'filename': row['path'].split('.')[0],
-        'reference_text': row['sentence']
-    })
+        # Iterate over the rows of the Ground Truth file
+        for _, row in df_in.iterrows():        
+            # Add the filename and the reference text to the list of transcriptions
+            self.transciptions.append({
+                'filename': row['path'].split('.')[0],
+                'reference_text': row['sentence']
+            })
 
-print(transciptions[:10])
+        print(self.transciptions[:10])
 
-cnt = 0
+        return video_format
 
-print(f"Total of {len(transciptions)} clips to transcribe")
+    def transcribe_clips(self, video_format: str, limit: int = 0):
+        cnt = 0
 
-# Iterate over the transcriptions and transcribe the clips
-for transription in transciptions:
-    if ((cnt+1) % 10 == 0):
-        print(f"Clip {cnt+1} out of {len(transciptions)}")
-    
-    # Transcribe the clip
-    segs, _ = model.transcribe(
-        os.path.join(base_clips_dir, f"{transription['filename']}.mp3"),
-        language='he',
-        temperature=0.0,
-        beam_size=10)
+        if limit == 0:
+            limit = len(self.transciptions)
 
-    # Get the text from the transcriptions
-    texts = [s.text for s in segs]
+        print(f"Total of {limit} clips to transcribe")
 
-    # Join the text from the transcriptions into a single string
-    transcribed_text = ' '.join(texts)
+        # Iterate over the transcriptions and transcribe the clips
+        for transription in self.transciptions[:limit]:
+            if ((cnt+1) % 10 == 0):
+                print(f"Clip {cnt+1} out of {limit}")
+            
+            # Transcribe the clip
+            segs, _ = self.model.transcribe(
+                os.path.join(self.base_clips_dir, f"{transription['filename']}.{video_format}"),
+                language='he',
+                temperature=0.0,
+                beam_size=10)
 
-    # Add the transcribed text to the transcription
-    transciptions[cnt]['transcribed_text'] = transcribed_text
+            # Get the text from the transcriptions
+            texts = [s.text for s in segs]
 
-    cnt+=1
+            # Join the text from the transcriptions into a single string
+            transcribed_text = ' '.join(texts)
 
-# Create a DataFrame from the transcriptions
-df_out = pd.DataFrame(transciptions)
+            # Add the transcribed text to the transcription
+            self.transciptions[cnt]['transcribed_text'] = transcribed_text
 
-# Save the DataFrame to a TSV file
-df_out.to_csv(os.path.join('results', 'part1_transcriptions.tsv'), sep='\t', index=False)
+            cnt+=1
+
+    def save_transcriptions(self):
+        # Create a DataFrame from the transcriptions
+        df_out = pd.DataFrame(self.transciptions)
+
+        # Save the DataFrame to a TSV file
+        df_out.to_csv(self.output_file, sep='\t', index=False)
+
+def main():
+    # Create a new Part1 object
+    part1 = Part1(
+        referenced_file=os.path.join('..', 'cv-corpus-24.0-2025-12-05', 'he', 'test.tsv'),
+        base_clips_dir=os.path.join('..', 'cv-corpus-24.0-2025-12-05', 'he', 'clips'),
+        output_file=os.path.join('results', 'part1_transcriptions.tsv')
+    )
+
+    video_format = part1.read_referenced_file()
+    part1.transcribe_clips(video_format)
+    part1.save_transcriptions()
+
+if __name__ == "__main__":
+    main()
