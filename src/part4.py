@@ -194,14 +194,5 @@ def main():
     statistics_total = part2.process_transcriptions(to_normalize=True)
     part2.save_statistics(statistics_total)
 
-def main2():
-    part2 = Part2(
-        input_transcriptions_file=NOISY_TRANSCRIPTIONS_FILE,
-        output_statistics_file=STATISTICS_FILE,
-        output_transcriptions_file=NORMALIZED_TRANSCRIPTIONS_FILE
-    )
-    statistics_total = part2.process_transcriptions(to_normalize=True)
-    part2.save_statistics(statistics_total)
-
 if __name__ == "__main__":
-    main2()
+    main()
