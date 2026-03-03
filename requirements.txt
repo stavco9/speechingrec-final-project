@@ -6,5 +6,6 @@ idisplay
 num2words
 editdistance
 phunspell
-torch
-transformers==4.44.2
+transformers
+scipy
+soundfile
